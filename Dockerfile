@@ -10,6 +10,9 @@ RUN apk add py3-pygments
 # Install inkscape
 RUN apk add inkscape
 
+# Install inotify-tools
+RUN apk add inotify-tools
+
 WORKDIR /app
 
 COPY ./latex-launch ./latex-launch
@@ -23,4 +26,3 @@ WORKDIR /tmp/build/
 ENTRYPOINT ["/app/latex-launch"]
 
 CMD ["-n", "main", "-o", "latex_out", "-bno", "-e", "pdflatex"]
-

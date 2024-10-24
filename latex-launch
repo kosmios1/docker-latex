@@ -2,21 +2,32 @@
 
 set -euo
 
+function cleanup() {
+    if [ "$WATCH" != "no" ]; then
+        killall inotifywait
+    fi
+    exit
+}
+
+trap cleanup SIGINT SIGTERM EXIT
+
 FILE_NAME=unset
 OUT_DIR=unset
 ENGINE="pdflatex"
 USE_BIBER="no"
+WATCH="no"
 
-SHORT=n:,o:,b::,e:
-LONG=file-name:,out-dir:,use-biber::,engine:
+SHORT=n:,o:,b::,e:,w:
+LONG=file-name:,out-dir:,use-biber::,engine:,watch:
 OPTS=$(getopt -a -n latex-launch --options $SHORT --longoptions $LONG -- "$@")
 
 if [ "$#" -eq 0 ]; then
-    echo "Usage: latex-launch 
+    echo "Usage: latex-launch
                 [ -n | --file-name ]
                 [ -o | --out-dir   ]
                 [ -b | --use-biber ]
-                [ -e | --engine    ]"
+                [ -e | --engine    ]
+                [ -w | --watch     ]"
     exit 2
 fi
 
@@ -40,6 +51,10 @@ do
         ENGINE="$2"
         shift 2
         ;;
+    -w | --watch)
+        WATCH="$2"
+        shift 2
+        ;;
     --)
       shift;
       break
@@ -52,19 +67,34 @@ done
 
 echo "[INFO] RUNNING WITH THIS PARAMETERS:
 {
-    file name: $FILE_NAME, 
-    output_dir: $OUT_DIR, 
+    file name: $FILE_NAME,
+    output_dir: $OUT_DIR,
     using_biber: $USE_BIBER,
-    engine:      $ENGINE
+    engine:      $ENGINE,
+    watch:       $WATCH
 }"
 
-# -interaction=batchmode
-LATEX_ARG="-shell-escape -output-directory=$OUT_DIR $FILE_NAME.tex"
 
-$ENGINE $LATEX_ARG
+function compile() {
+    echo "ciao mondo"
 
-if [ "$USE_BIBER" != "no" ]; then
-    biber -output-directory=$OUT_DIR -input-directory=$OUT_DIR $FILE_NAME
-    $ENGINE $LATEX_ARG 
+    LATEX_ARG="-shell-escape -interaction=batchmode -output-directory=$OUT_DIR $FILE_NAME.tex"
+    $ENGINE $LATEX_ARG
+
+    if [ "$USE_BIBER" != "no" ]; then
+        biber -output-directory=$OUT_DIR -input-directory=$OUT_DIR $FILE_NAME
+        $ENGINE $LATEX_ARG
+    fi
+}
+
+if [ "$WATCH" == "no" ]; then
+    compile
+else
+    inotifywait -m -r -e modify --format '%f' "." | while read  -r NEWFILE; do
+        if [[ $NEWFILE == *.tex ]]; then
+            compile
+        fi
+    done &
+
+    wait $!
 fi
-
