@@ -22,5 +22,5 @@ WORKDIR /tmp/build/
 # command to execute
 ENTRYPOINT ["/app/latex-launch"]
 
-CMD ["-file-name", "main", "-out-dir", "latex_out", "-bno"]
+CMD ["-n", "main", "-o", "latex_out", "-bno", "-e", "pdflatex"]
 

@@ -1,20 +1,22 @@
 #!/bin/bash
 
-set -euxo
+set -euo
 
 FILE_NAME=unset
 OUT_DIR=unset
+ENGINE="pdflatex"
 USE_BIBER="no"
 
-SHORT=n:,o:,b::
-LONG=file-name:,out-dir:,use-biber::
+SHORT=n:,o:,b::,e:
+LONG=file-name:,out-dir:,use-biber::,engine:
 OPTS=$(getopt -a -n latex-launch --options $SHORT --longoptions $LONG -- "$@")
 
 if [ "$#" -eq 0 ]; then
     echo "Usage: latex-launch 
                 [ -n | --file-name ]
                 [ -o | --out-dir   ]
-                [ -b | --use-biber ]"
+                [ -b | --use-biber ]
+                [ -e | --engine    ]"
     exit 2
 fi
 
@@ -34,6 +36,10 @@ do
         USE_BIBER="$2"
         shift 2
         ;;
+    -e | --engine)
+        ENGINE="$2"
+        shift 2
+        ;;
     --)
       shift;
       break
@@ -48,16 +54,17 @@ echo "[INFO] RUNNING WITH THIS PARAMETERS:
 {
     file name: $FILE_NAME, 
     output_dir: $OUT_DIR, 
-    using_biber: $USE_BIBER
+    using_biber: $USE_BIBER,
+    engine:      $ENGINE
 }"
 
 # -interaction=batchmode
-LATEX_ARG="-shell-escape  -output-directory=$OUT_DIR $FILE_NAME.tex"
+LATEX_ARG="-shell-escape -output-directory=$OUT_DIR $FILE_NAME.tex"
 
-pdflatex $LATEX_ARG
+$ENGINE $LATEX_ARG
 
 if [ "$USE_BIBER" != "no" ]; then
     biber -output-directory=$OUT_DIR -input-directory=$OUT_DIR $FILE_NAME
-    pdflatex $LATEX_ARG 
+    $ENGINE $LATEX_ARG 
 fi
 
