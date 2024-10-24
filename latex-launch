@@ -1,0 +1,63 @@
+#!/bin/bash
+
+set -euxo
+
+FILE_NAME=unset
+OUT_DIR=unset
+USE_BIBER="no"
+
+SHORT=n:,o:,b::
+LONG=file-name:,out-dir:,use-biber::
+OPTS=$(getopt -a -n latex-launch --options $SHORT --longoptions $LONG -- "$@")
+
+if [ "$#" -eq 0 ]; then
+    echo "Usage: latex-launch 
+                [ -n | --file-name ]
+                [ -o | --out-dir   ]
+                [ -b | --use-biber ]"
+    exit 2
+fi
+
+eval set -- "$OPTS"
+while :
+do
+  case "$1" in
+    -n | --file-name)
+        FILE_NAME="$2"
+        shift 2
+        ;;
+    -o | --out-dir)
+        OUT_DIR="$2"
+        shift 2
+        ;;
+    -b | --use-biber)
+        USE_BIBER="$2"
+        shift 2
+        ;;
+    --)
+      shift;
+      break
+      ;;
+    *)
+      echo "Unexpected option: $1"
+      ;;
+  esac
+done
+
+echo "[INFO] RUNNING WITH THIS PARAMETERS:
+{
+    file name: $FILE_NAME, 
+    output_dir: $OUT_DIR, 
+    using_biber: $USE_BIBER
+}"
+
+# -interaction=batchmode
+LATEX_ARG="-shell-escape  -output-directory=$OUT_DIR $FILE_NAME.tex"
+
+pdflatex $LATEX_ARG
+
+if [ "$USE_BIBER" != "no" ]; then
+    biber -output-directory=$OUT_DIR -input-directory=$OUT_DIR $FILE_NAME
+    pdflatex $LATEX_ARG 
+fi
+
