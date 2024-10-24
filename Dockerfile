@@ -5,16 +5,22 @@ RUN apk update && apk add texmf-dist texlive-full
 RUN apk add biber
 
 # minted dependecies
-RUN apk add python3 py3-pip && pip3 install pygments
+RUN apk add py3-pygments
 
 # Install inkscape
 RUN apk add inkscape
 
+WORKDIR /app
+
+COPY ./latex-launch ./latex-launch
+RUN chmod +x latex-launch
+
 # set workdir
 WORKDIR /tmp/build/
 
+
 # command to execute
-ENTRYPOINT ["./latex-launch.sh"]
+ENTRYPOINT ["/app/latex-launch"]
 
 CMD ["-file-name", "main", "-out-dir", "latex_out", "-bno"]
 
