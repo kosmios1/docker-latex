@@ -4,16 +4,12 @@ Simple docker image to build latex projects.
 
 ## How to use 
 
-First create the folder where you want to output build output:
-```
-mkdir ./latex_out/
-```
-
-Then:
 ```
 docker run --rm -v <path-to-project>:/tmp/build docker-latex:latest --file-name main --out-dir ./latex_out/ --use-biber=yes --engine pdflatex
 docker run --rm -v <path-to-project>:/tmp/build docker-latex:latest -n main -o latex_out -byes -e pdflatex
 ```
+
+To use the watch add the flag `--watch yes` or `-wyes` to previous commands.
 
 ### FAQ
 

@@ -67,8 +67,8 @@ done
 
 echo "[INFO] RUNNING WITH THIS PARAMETERS:
 {
-    file name: $FILE_NAME,
-    output_dir: $OUT_DIR,
+    file name:   $FILE_NAME,
+    output_dir:  $OUT_DIR,
     using_biber: $USE_BIBER,
     engine:      $ENGINE,
     watch:       $WATCH
@@ -76,8 +76,6 @@ echo "[INFO] RUNNING WITH THIS PARAMETERS:
 
 
 function compile() {
-    echo "ciao mondo"
-
     LATEX_ARG="-shell-escape -interaction=batchmode -output-directory=$OUT_DIR $FILE_NAME.tex"
     $ENGINE $LATEX_ARG
 
@@ -86,6 +84,8 @@ function compile() {
         $ENGINE $LATEX_ARG
     fi
 }
+
+mkdir -p $OUT_DIR
 
 if [ "$WATCH" == "no" ]; then
     compile

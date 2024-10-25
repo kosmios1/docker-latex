@@ -10,7 +10,7 @@ RUN apk add py3-pygments
 # Install inkscape
 RUN apk add inkscape
 
-# Install inotify-tools
+# Install packages to make watch on files
 RUN apk add inotify-tools
 
 WORKDIR /app
@@ -21,8 +21,10 @@ RUN chmod +x latex-launch
 # set workdir
 WORKDIR /tmp/build/
 
+RUN adduser --uid 1000 --disabled-password latex
+USER latex
 
 # command to execute
 ENTRYPOINT ["/app/latex-launch"]
 
-CMD ["-n", "main", "-o", "latex_out", "-bno", "-e", "pdflatex"]
+CMD ["-n", "main", "-o", "latex_out", "-bno", "-e", "pdflatex", "-wno"]
